@@ -1,0 +1,16 @@
+{
+  "name": "ことわざ場面あて",
+  "short_name": "ことわざ",
+  "description": "身近な場面に合うことわざを当てる1日5問",
+  "lang": "ja",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ece3cf",
+  "theme_color": "#1f3a2c",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
