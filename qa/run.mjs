@@ -16,6 +16,8 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const results = [];
 const check = (name, ok, detail = "") => results.push({ name, ok: !!ok, detail: String(detail).slice(0, 400) });
 const G = createRequire(import.meta.url)(path.join(root, "data.js"));
+// 覚えた結果（MEMO）の無い data.js を読み直す（その日だけを作っても同じ問題になるか見る）
+const freshData = () => { const m = { exports: {} }; new Function("module", "self", readFileSync(path.join(root, "data.js"), "utf8"))(m, undefined); return m.exports; };
 const EPOCH = "2026-11-07";
 const addDay = (k, n) => new Date(Date.parse(k) + n * 864e5).toISOString().slice(0, 10);
 
@@ -30,6 +32,7 @@ const addDay = (k, n) => new Date(Date.parse(k) + n * 864e5).toISOString().slice
     { const kw = (/「(.+?)」/.exec(x.c[2] || "") || [])[1]; if (!kw || !x.n.includes(kw) || G.D.some((y) => y.id !== x.id && y.n.includes(kw))) bad.push(`${x.id}:手がかり三の言葉は、このことわざだけに入っている`); }
     if (!x.n || !x.r || !/^[ぁ-んー]+$/.test(x.r) || !x.e || !x.why || [...x.why].length > 110 || !x.src) bad.push(`${x.id}:名前・読み・絵・説明（110字以内）・出典`);
     const core = x.n.replace(/（.*?）/g, ""), alt = (x.n.match(/（(.*?)）/) || [])[1];
+    { const kw = (/「(.+?)」/.exec(x.c[2] || "") || [])[1]; if (kw && (x.c[0].includes(kw) || x.c[1].includes(kw))) bad.push(`${x.id}:場面一・二に手がかり三の言葉「${kw}」が入っている`); }
     if (x.c.some((c) => c.includes(core) || (alt && c.includes(alt)) || c.includes(x.r))) bad.push(`${x.id}:手がかりに答えの名前`);
     if (x.g && (!Array.isArray(x.g) || !x.g.every((g) => typeof g === "string"))) bad.push(`${x.id}:g の形`);
   }
@@ -64,7 +67,7 @@ const addDay = (k, n) => new Date(Date.parse(k) + n * 864e5).toISOString().slice
     if (d.length !== 5 || new Set(d.map((x) => x.id)).size !== 5) bad.push(`${k}:5つちがう`);
     if (d[0].cat !== "h" || d[1].cat !== "s" || d[2].cat !== "d" || d.slice(0, 3).some((x) => x.lv > 1) || d[3].lv !== 1 || d[4].lv !== 2) bad.push(`${k}:並び`);
     if (h.length !== 3 || h.map((x) => x.cat).join() !== "h,s,d" || h.some((x) => x.lv !== 2 || d.includes(x))) bad.push(`${k}:上級`);
-    if (JSON.stringify(G.dailyTags(k)) !== JSON.stringify(G.dailyTags(k))) bad.push(`${k}:同じ日で同じにならない`);
+    if (i % 30 === 0) { const F = freshData(); if (JSON.stringify(F.dailyTags(k)) !== JSON.stringify(G.dailyTags(k)) || JSON.stringify(F.hardTags(k)) !== JSON.stringify(G.hardTags(k))) bad.push(`${k}:前の日を作らずにその日だけ作ると、ちがう問題になる`); }
     if (bad.length) break;
   }
   check("今日の5問：3年分、人づきあい・失敗と用心・努力と運を1つずつ（やさしい〜ふつう）＋ふつう1・むずかしい1、重ならない。上級は各分野のむずかしいを1つずつ、今日の5問と重ねない", bad.length === 0, bad.join(" / "));
