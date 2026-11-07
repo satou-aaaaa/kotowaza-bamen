@@ -3,6 +3,7 @@
 // 通しで遊ぶ・まちがい・手がかりを聞く・続きから・上級・練習・とことん・ことわざ帳・実績・カレンダー・あとから・古いタブ・
 // スマホ幅・PWA・引き継ぎコード・見やすさを確かめる。
 // 使い方: node qa/run.mjs   失敗があれば終了コード 1。結果は qa-report/report.md。
+import { checkSwStall } from "./sw-check.mjs";
 import { chromium } from "playwright";
 import { mkdirSync, writeFileSync, readFileSync, existsSync } from "node:fs";
 import { createRequire } from "node:module";
@@ -117,6 +118,7 @@ check("README の URL のすぐ後ろに全角の字を続けない（Link check
 { const sw = readFileSync(path.join(root, "sw.js"), "utf8"), mf = JSON.parse(readFileSync(path.join(root, "manifest.webmanifest"), "utf8"));
   const shell = JSON.parse(sw.match(/SHELL = (\[[^\]]+\])/)[1]);
   check("PWA：sw.js は画面のファイルを全部保存し（引き継ぎの transfer.js も）、取り直して保存し、外へ何も送らない", ["./index.html", "./data.js", "./transfer.js", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png"].every((f) => shell.includes(f)) && /cache: "reload"/.test(sw) && !/https?:\/\//.test(sw.replace(/^\/\/.*$/gm, "")));
+  { const st = await checkSwStall(sw); check("PWA：本文の途中で通信が止まっても、4秒で保存した画面を返す（qa/sw-check.mjs）", st.ok, JSON.stringify(st)); }
   check("PWA：manifest にアイコン2つと名前がある", mf.name === "ことわざ場面あて" && mf.icons.length >= 2 && mf.start_url === "./"); }
 
 // ---- 3. とことん・練習の並び（ブラウザの中の関数を何百回）----
