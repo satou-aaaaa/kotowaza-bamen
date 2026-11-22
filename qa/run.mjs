@@ -189,7 +189,7 @@ try {
     const res = [];
     for (let i = 0; i < 10; i++) {
       const p = await newPage();
-      const first = await p.locator("#core-coach").count() === 1;
+      const first = await p.locator("#core-coach").waitFor({ timeout: 3000 }).then(() => true, () => false);
       await p.keyboard.press("Escape");
       const saved = await p.evaluate(() => __kk.load().tut === true);
       await p.reload(); await p.waitForTimeout(150);
@@ -202,7 +202,7 @@ try {
 
   // ---- 4. ブラウザで遊ぶ ----
   const p = await newPage();
-  check("はじめて開くと遊び方が出る", await p.locator("#core-coach").count() === 1);
+  check("はじめて開くと遊び方が出る", await p.locator("#core-coach").waitFor({ timeout: 3000 }).then(() => true, () => false));
   await firstClose(p);
   check("「わかった」を押した直後に、遊び方を見た印が残っている（close を待たない）", await p.evaluate(() => __kk.load().tut === true));
   check("上級・とことん・練習は、はじめての日から押せる（鍵なし）", await p.locator("#go-h:not([disabled])").count() === 1 && await p.locator("#go-e:not([disabled])").count() === 1 && await p.locator("#go-p:not([disabled])").count() === 1);
